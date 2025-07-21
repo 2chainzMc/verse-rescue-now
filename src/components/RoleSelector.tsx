@@ -113,7 +113,7 @@ const RoleSelector: React.FC = () => {
         <div className="flex gap-2">
           <Button variant="emergency" size="sm" className="gap-2">
             <Phone className="h-4 w-4" />
-            Call 112
+            Call 10111
           </Button>
           <Button variant="outline" size="sm" className="gap-2">
             <MessageCircle className="h-4 w-4" />

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
   MapPin, 
   Navigation as NavigationIcon, 
@@ -62,6 +63,80 @@ const DriverDashboard: React.FC = () => {
     // Simulate earnings update
   };
 
+  // Modal components
+  const CallCustomerModal = () => (
+    <DialogContent className="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>Call Customer</DialogTitle>
+      </DialogHeader>
+      <div className="space-y-4">
+        <div className="text-center space-y-2">
+          <div className="bg-primary/10 rounded-full p-4 w-fit mx-auto">
+            <Phone className="h-8 w-8 text-primary" />
+          </div>
+          <h3 className="font-semibold text-lg">{activeJob?.customerName}</h3>
+          <p className="text-muted-foreground">+27 83 123 4567</p>
+          <p className="text-sm text-muted-foreground">Customer waiting for pickup</p>
+        </div>
+        <div className="space-y-2 text-sm">
+          <div className="flex justify-between">
+            <span>Location:</span>
+            <span className="font-medium">{activeJob?.location}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Job Value:</span>
+            <span className="font-semibold text-primary">{activeJob?.payout}</span>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button className="flex-1" onClick={() => window.open('tel:+27831234567')}>
+            <Phone className="h-4 w-4 mr-2" />
+            Call Now
+          </Button>
+          <Button variant="outline" className="flex-1">
+            Cancel
+          </Button>
+        </div>
+      </div>
+    </DialogContent>
+  );
+
+  const MessageCustomerModal = () => (
+    <DialogContent className="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>Message Customer</DialogTitle>
+      </DialogHeader>
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Quick Messages</label>
+          <div className="grid grid-cols-1 gap-2">
+            <Button variant="outline" size="sm" className="justify-start">
+              "I'm on my way, ETA 10 minutes"
+            </Button>
+            <Button variant="outline" size="sm" className="justify-start">
+              "I've arrived at your location"
+            </Button>
+            <Button variant="outline" size="sm" className="justify-start">
+              "Please stay with your vehicle"
+            </Button>
+            <Button variant="outline" size="sm" className="justify-start">
+              "Running 5 minutes late due to traffic"
+            </Button>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button className="flex-1">
+            <MessageCircle className="h-4 w-4 mr-2" />
+            Open Chat
+          </Button>
+          <Button variant="outline" className="flex-1">
+            Cancel
+          </Button>
+        </div>
+      </div>
+    </DialogContent>
+  );
+
   if (activeJob) {
     return (
       <div className="min-h-screen bg-background">
@@ -102,14 +177,25 @@ const DriverDashboard: React.FC = () => {
               </div>
               
               <div className="flex gap-2">
-                <Button className="flex-1 gap-2">
-                  <Phone className="h-4 w-4" />
-                  Call Customer
-                </Button>
-                <Button variant="outline" className="flex-1 gap-2">
-                  <MessageCircle className="h-4 w-4" />
-                  Message
-                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="flex-1 gap-2">
+                      <Phone className="h-4 w-4" />
+                      Call Customer
+                    </Button>
+                  </DialogTrigger>
+                  <CallCustomerModal />
+                </Dialog>
+                
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="flex-1 gap-2">
+                      <MessageCircle className="h-4 w-4" />
+                      Message
+                    </Button>
+                  </DialogTrigger>
+                  <MessageCustomerModal />
+                </Dialog>
               </div>
             </CardContent>
           </Card>

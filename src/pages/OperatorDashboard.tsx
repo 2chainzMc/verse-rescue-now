@@ -4,6 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   Users, 
   MapPin, 
@@ -121,6 +124,103 @@ const OperatorDashboard: React.FC = () => {
       default: return 'secondary';
     }
   };
+
+  // Modal content components
+  const CallModal = ({ contact }: { contact: any }) => (
+    <DialogContent className="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>Call {contact.name}</DialogTitle>
+      </DialogHeader>
+      <div className="space-y-4">
+        <div className="text-center space-y-2">
+          <div className="bg-primary/10 rounded-full p-4 w-fit mx-auto">
+            <Phone className="h-8 w-8 text-primary" />
+          </div>
+          <h3 className="font-semibold text-lg">{contact.name}</h3>
+          <p className="text-muted-foreground">+27 11 123 4567</p>
+        </div>
+        <div className="flex gap-2">
+          <Button className="flex-1" onClick={() => window.open('tel:+27111234567')}>
+            Call Now
+          </Button>
+          <Button variant="outline" className="flex-1">
+            Cancel
+          </Button>
+        </div>
+      </div>
+    </DialogContent>
+  );
+
+  const MessageModal = ({ contact }: { contact: any }) => (
+    <DialogContent className="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>Message {contact.name}</DialogTitle>
+      </DialogHeader>
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Quick Messages</label>
+          <div className="grid grid-cols-1 gap-2">
+            <Button variant="outline" size="sm" className="justify-start">
+              "What's your current status?"
+            </Button>
+            <Button variant="outline" size="sm" className="justify-start">
+              "Please proceed to pickup location"
+            </Button>
+            <Button variant="outline" size="sm" className="justify-start">
+              "Customer is waiting for you"
+            </Button>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Custom Message</label>
+          <Textarea placeholder="Type your message..." />
+        </div>
+        <div className="flex gap-2">
+          <Button className="flex-1">
+            <MessageCircle className="h-4 w-4 mr-2" />
+            Send Message
+          </Button>
+          <Button variant="outline" className="flex-1">
+            Cancel
+          </Button>
+        </div>
+      </div>
+    </DialogContent>
+  );
+
+  const NavigationModal = ({ location }: { location: string }) => (
+    <DialogContent className="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>Navigation Options</DialogTitle>
+      </DialogHeader>
+      <div className="space-y-4">
+        <div className="text-center space-y-2">
+          <div className="bg-primary/10 rounded-full p-4 w-fit mx-auto">
+            <NavigationIcon className="h-8 w-8 text-primary" />
+          </div>
+          <h3 className="font-semibold">Navigate to Location</h3>
+          <p className="text-sm text-muted-foreground">{location}</p>
+        </div>
+        <div className="grid grid-cols-1 gap-2">
+          <Button className="justify-start" onClick={() => window.open(`https://maps.google.com/maps?q=${encodeURIComponent(location)}`)}>
+            <NavigationIcon className="h-4 w-4 mr-2" />
+            Open in Google Maps
+          </Button>
+          <Button variant="outline" className="justify-start" onClick={() => window.open(`https://waze.com/ul?q=${encodeURIComponent(location)}`)}>
+            <NavigationIcon className="h-4 w-4 mr-2" />
+            Open in Waze
+          </Button>
+          <Button variant="outline" className="justify-start">
+            <MapPin className="h-4 w-4 mr-2" />
+            Track on Internal Map
+          </Button>
+        </div>
+        <Button variant="outline" className="w-full">
+          Cancel
+        </Button>
+      </div>
+    </DialogContent>
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -244,15 +344,32 @@ const OperatorDashboard: React.FC = () => {
                       <div className="text-right space-y-2">
                         <p className="text-lg font-bold">{job.eta}</p>
                         <div className="flex gap-1">
-                          <Button size="sm" variant="outline">
-                            <Phone className="h-3 w-3" />
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            <MessageCircle className="h-3 w-3" />
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            <NavigationIcon className="h-3 w-3" />
-                          </Button>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button size="sm" variant="outline">
+                                <Phone className="h-3 w-3" />
+                              </Button>
+                            </DialogTrigger>
+                            <CallModal contact={{ name: job.driver }} />
+                          </Dialog>
+                          
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button size="sm" variant="outline">
+                                <MessageCircle className="h-3 w-3" />
+                              </Button>
+                            </DialogTrigger>
+                            <MessageModal contact={{ name: job.driver }} />
+                          </Dialog>
+                          
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button size="sm" variant="outline">
+                                <NavigationIcon className="h-3 w-3" />
+                              </Button>
+                            </DialogTrigger>
+                            <NavigationModal location={job.location} />
+                          </Dialog>
                         </div>
                       </div>
                     </div>
@@ -293,12 +410,23 @@ const OperatorDashboard: React.FC = () => {
                           {driver.todayJobs} jobs today
                         </p>
                         <div className="flex gap-1">
-                          <Button size="sm" variant="outline">
-                            <Phone className="h-3 w-3" />
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            <MessageCircle className="h-3 w-3" />
-                          </Button>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button size="sm" variant="outline">
+                                <Phone className="h-3 w-3" />
+                              </Button>
+                            </DialogTrigger>
+                            <CallModal contact={{ name: driver.name }} />
+                          </Dialog>
+                          
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button size="sm" variant="outline">
+                                <MessageCircle className="h-3 w-3" />
+                              </Button>
+                            </DialogTrigger>
+                            <MessageModal contact={{ name: driver.name }} />
+                          </Dialog>
                         </div>
                       </div>
                     </div>

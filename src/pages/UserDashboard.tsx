@@ -3,6 +3,7 @@ import Navigation from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
   MapPin, 
   Truck, 
@@ -28,6 +29,111 @@ const UserDashboard: React.FC = () => {
       setActiveRequest(true);
     }, 3000);
   };
+
+  // Modal components
+  const CallDriverModal = () => (
+    <DialogContent className="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>Call Driver</DialogTitle>
+      </DialogHeader>
+      <div className="space-y-4">
+        <div className="text-center space-y-2">
+          <div className="bg-primary/10 rounded-full p-4 w-fit mx-auto">
+            <Phone className="h-8 w-8 text-primary" />
+          </div>
+          <h3 className="font-semibold text-lg">Sipho Mthembu</h3>
+          <p className="text-muted-foreground">+27 82 456 7890</p>
+          <p className="text-sm text-muted-foreground">Your assigned tow truck driver</p>
+        </div>
+        <div className="flex gap-2">
+          <Button className="flex-1" onClick={() => window.open('tel:+27824567890')}>
+            <Phone className="h-4 w-4 mr-2" />
+            Call Now
+          </Button>
+          <Button variant="outline" className="flex-1">
+            Cancel
+          </Button>
+        </div>
+      </div>
+    </DialogContent>
+  );
+
+  const MessageDriverModal = () => (
+    <DialogContent className="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>Message Driver</DialogTitle>
+      </DialogHeader>
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Quick Messages</label>
+          <div className="grid grid-cols-1 gap-2">
+            <Button variant="outline" size="sm" className="justify-start">
+              "I'm at the location, where are you?"
+            </Button>
+            <Button variant="outline" size="sm" className="justify-start">
+              "How long until you arrive?"
+            </Button>
+            <Button variant="outline" size="sm" className="justify-start">
+              "I'll be waiting by the blue car"
+            </Button>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button className="flex-1">
+            <MessageCircle className="h-4 w-4 mr-2" />
+            Open Chat
+          </Button>
+          <Button variant="outline" className="flex-1">
+            Cancel
+          </Button>
+        </div>
+      </div>
+    </DialogContent>
+  );
+
+  const CallTruckModal = ({ truck }: { truck: any }) => (
+    <DialogContent className="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>Call {truck.driverName}</DialogTitle>
+      </DialogHeader>
+      <div className="space-y-4">
+        <div className="text-center space-y-2">
+          <div className="bg-primary/10 rounded-full p-4 w-fit mx-auto">
+            <Phone className="h-8 w-8 text-primary" />
+          </div>
+          <h3 className="font-semibold text-lg">{truck.driverName}</h3>
+          <p className="text-muted-foreground">+27 82 555 0123</p>
+          <div className="flex items-center justify-center gap-1">
+            <Star className="h-4 w-4 fill-warning text-warning" />
+            <span className="text-sm">{truck.rating} • {truck.truckType}</span>
+          </div>
+        </div>
+        <div className="space-y-2 text-sm">
+          <div className="flex justify-between">
+            <span>ETA:</span>
+            <span className="font-semibold">{truck.eta}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Distance:</span>
+            <span>{truck.distance}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Estimated Cost:</span>
+            <span className="font-semibold text-primary">{truck.price}</span>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button className="flex-1" onClick={() => window.open('tel:+27825550123')}>
+            <Phone className="h-4 w-4 mr-2" />
+            Call Now
+          </Button>
+          <Button variant="outline" className="flex-1">
+            Cancel
+          </Button>
+        </div>
+      </div>
+    </DialogContent>
+  );
 
   const nearbyTrucks = [
     {
@@ -98,14 +204,25 @@ const UserDashboard: React.FC = () => {
               </div>
               
               <div className="flex gap-2">
-                <Button className="flex-1 gap-2">
-                  <Phone className="h-4 w-4" />
-                  Call Driver
-                </Button>
-                <Button variant="outline" className="flex-1 gap-2">
-                  <MessageCircle className="h-4 w-4" />
-                  Message
-                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="flex-1 gap-2">
+                      <Phone className="h-4 w-4" />
+                      Call Driver
+                    </Button>
+                  </DialogTrigger>
+                  <CallDriverModal />
+                </Dialog>
+                
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="flex-1 gap-2">
+                      <MessageCircle className="h-4 w-4" />
+                      Message
+                    </Button>
+                  </DialogTrigger>
+                  <MessageDriverModal />
+                </Dialog>
               </div>
             </CardContent>
           </Card>
@@ -239,9 +356,14 @@ const UserDashboard: React.FC = () => {
                     
                     <div className="mt-4 flex gap-2">
                       <Button className="flex-1">Select This Driver</Button>
-                      <Button variant="outline" size="icon">
-                        <Phone className="h-4 w-4" />
-                      </Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="icon">
+                            <Phone className="h-4 w-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <CallTruckModal truck={truck} />
+                      </Dialog>
                     </div>
                   </CardContent>
                 </Card>
