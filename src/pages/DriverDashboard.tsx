@@ -17,7 +17,36 @@ import {
   User,
   AlertCircle,
   TrendingUp
-} from 'lucide-react';
+  } from 'lucide-react';
+
+// API functions
+const fetchDriverStats = async () => {
+  try {
+    const response = await fetch('/api/driver/stats', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('driverToken')}`
+      }
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Failed to fetch stats:', error);
+    return null;
+  }
+};
+
+const fetchPendingJobs = async () => {
+  try {
+    const response = await fetch('/api/jobs/available', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('driverToken')}`
+      }
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Failed to fetch jobs:', error);
+    return [];
+  }
+};
 
 const DriverDashboard: React.FC = () => {
   const [isOnline, setIsOnline] = useState(false);
@@ -30,6 +59,9 @@ const DriverDashboard: React.FC = () => {
       destination: "Mike's Garage, Sandton", 
       distance: "3.2 km",
       payout: "R 340",
+      priceSource: "admin",
+      baseFare: "R 180",
+      distanceRate: "R 50/km",
       urgency: "high",
       estimatedTime: "25 mins"
     },
@@ -40,8 +72,24 @@ const DriverDashboard: React.FC = () => {
       destination: "AutoZone, Kempton Park",
       distance: "8.1 km", 
       payout: "R 520",
+      priceSource: "dynamic",
+      baseFare: "R 200",
+      distanceRate: "R 40/km",
       urgency: "medium",
       estimatedTime: "45 mins"
+    },
+    {
+      id: 3,
+      customerName: "Mike Tshwane",
+      location: "N1 North, Pretoria",
+      destination: "AA Service Center",
+      distance: "5.5 km",
+      payout: "R 450",
+      priceSource: "admin",
+      baseFare: "R 200",
+      distanceRate: "R 45/km",
+      urgency: "low",
+      estimatedTime: "30 mins"
     }
   ]);
 
@@ -52,15 +100,58 @@ const DriverDashboard: React.FC = () => {
     responseTime: "4.2 mins"
   };
 
-  const handleAcceptJob = (jobId: number) => {
+  const handleAcceptJob = async (jobId: number) => {
     const job = pendingRequests.find(j => j.id === jobId);
-    setActiveJob(job);
-    setPendingRequests(prev => prev.filter(j => j.id !== jobId));
+    
+    // API call to accept job
+    try {
+      const response = await fetch(`/api/jobs/${jobId}/accept`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('driverToken')}`
+        },
+        body: JSON.stringify({
+          driverId: localStorage.getItem('driverId'),
+          estimatedArrival: new Date(Date.now() + 15 * 60000).toISOString()
+        })
+      });
+      
+      if (response.ok) {
+        setActiveJob(job);
+        setPendingRequests(prev => prev.filter(j => j.id !== jobId));
+      }
+    } catch (error) {
+      console.error('Failed to accept job:', error);
+      // Handle error - show toast notification
+    }
   };
 
-  const handleCompleteJob = () => {
-    setActiveJob(null);
-    // Simulate earnings update
+  const handleCompleteJob = async () => {
+    if (!activeJob) return;
+    
+    try {
+      const response = await fetch(`/api/jobs/${activeJob.id}/complete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('driverToken')}`
+        },
+        body: JSON.stringify({
+          completedAt: new Date().toISOString(),
+          finalAmount: activeJob.payout,
+          driverId: localStorage.getItem('driverId')
+        })
+      });
+      
+      if (response.ok) {
+        setActiveJob(null);
+        // Update earnings and stats
+        fetchDriverStats();
+      }
+    } catch (error) {
+      console.error('Failed to complete job:', error);
+    }
   };
 
   // Modal components
@@ -161,7 +252,14 @@ const DriverDashboard: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Payout</p>
-                  <p className="font-semibold text-primary">{activeJob.payout}</p>
+                  <div className="space-y-1">
+                    <p className="font-semibold text-primary">{activeJob.payout}</p>
+                    <div className="flex items-center gap-1">
+                      <Badge variant={activeJob.priceSource === 'admin' ? 'default' : 'secondary'} className="text-xs">
+                        {activeJob.priceSource === 'admin' ? 'Admin Rate' : 'Dynamic Rate'}
+                      </Badge>
+                    </div>
+                  </div>
                 </div>
               </div>
               
@@ -329,8 +427,19 @@ const DriverDashboard: React.FC = () => {
                     
                     <div className="text-right space-y-1">
                       <p className="font-semibold text-primary">{request.payout}</p>
+                      <div className="flex items-center justify-end gap-1 mb-1">
+                        <Badge 
+                          variant={request.priceSource === 'admin' ? 'default' : 'secondary'} 
+                          className="text-xs"
+                        >
+                          {request.priceSource === 'admin' ? 'Admin' : 'Dynamic'}
+                        </Badge>
+                      </div>
                       <p className="text-sm text-muted-foreground">{request.distance}</p>
                       <p className="text-xs text-muted-foreground">~{request.estimatedTime}</p>
+                      <div className="text-xs text-muted-foreground">
+                        Base: {request.baseFare} + {request.distanceRate}
+                      </div>
                     </div>
                   </div>
                   
