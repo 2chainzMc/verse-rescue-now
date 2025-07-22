@@ -122,21 +122,28 @@ const RoleSelector: React.FC = () => {
         </div>
       </div>
 
-      {/* Registration Link */}
-      <div className="mt-8 text-center">
-        <p className="text-muted-foreground mb-4">
-          Need to create an account?
-        </p>
-        <button 
-          onClick={() => navigate('/register')}
-          className="text-primary hover:underline font-medium"
+      {/* Authentication Buttons */}
+      <div className="mt-8 flex flex-col sm:flex-row gap-4 items-center">
+        <Button 
+          onClick={() => navigate('/login')}
+          variant="default"
+          size="lg"
+          className="min-w-[120px]"
         >
-          Register Here
-        </button>
+          Login
+        </Button>
+        <Button 
+          onClick={() => navigate('/register')}
+          variant="outline"
+          size="lg"
+          className="min-w-[120px]"
+        >
+          Register
+        </Button>
       </div>
 
       {/* Footer */}
-      <div className="mt-4 text-center">
+      <div className="mt-6 text-center">
         <p className="text-xs text-muted-foreground">
           Serving South Africa with trusted, 24/7 emergency towing
         </p>

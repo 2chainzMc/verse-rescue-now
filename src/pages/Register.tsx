@@ -5,33 +5,118 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { useNavigate } from 'react-router-dom';
-import { Car, Truck, Building2, Crown } from 'lucide-react';
+import { Car, Truck, Building2, Crown, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
 
 const Register = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('user');
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+
+  const validateForm = (formData: any, userType: string) => {
+    setError('');
+
+    // Basic validation
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.password) {
+      setError('Please fill in all required fields');
+      return false;
+    }
+
+    if (!formData.email.includes('@')) {
+      setError('Please enter a valid email address');
+      return false;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return false;
+    }
+
+    if (formData.confirmPassword && formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return false;
+    }
+
+    // Role-specific validation
+    if (userType === 'driver') {
+      if (!formData.licenseNumber || !formData.vehicleType || !formData.vehicleRegistration) {
+        setError('Please fill in all driver-specific fields');
+        return false;
+      }
+    }
+
+    if (userType === 'operator') {
+      if (!formData.companyName || !formData.companyRegistration) {
+        setError('Please fill in all company details');
+        return false;
+      }
+    }
+
+    if (userType === 'admin') {
+      if (!formData.adminCode || !formData.department) {
+        setError('Please fill in all admin fields');
+        return false;
+      }
+    }
+
+    return true;
+  };
 
   const handleSubmit = async (formData: any, userType: string) => {
-    // API call structure ready for backend
-    const registrationData = {
-      userType,
-      ...formData,
-      timestamp: new Date().toISOString()
-    };
+    if (!validateForm(formData, userType)) {
+      return;
+    }
+
+    setIsLoading(true);
     
-    console.log('Registration data for API:', registrationData);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // API call structure ready for backend
+      const registrationData = {
+        userType,
+        ...formData,
+        timestamp: new Date().toISOString(),
+        status: 'pending_verification'
+      };
+      
+      console.log('Registration data for API:', registrationData);
+      
+      // Store user data for frontend simulation
+      localStorage.setItem('towverse_user', JSON.stringify({
+        email: formData.email,
+        userType,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        registrationTime: new Date().toISOString()
+      }));
+      
+      toast({
+        title: "Registration Successful!",
+        description: `Welcome to TowVerse! Your ${userType} account has been created.`,
+      });
+      
+      // Navigate to appropriate dashboard after registration
+      const routes = {
+        user: '/user',
+        driver: '/driver', 
+        operator: '/operator',
+        admin: '/admin'
+      };
+      
+      navigate(routes[userType as keyof typeof routes]);
+      
+    } catch (err) {
+      setError('Registration failed. Please try again.');
+    }
     
-    // Navigate to appropriate dashboard after registration
-    const routes = {
-      user: '/user',
-      driver: '/driver', 
-      operator: '/operator',
-      admin: '/admin'
-    };
-    
-    navigate(routes[userType as keyof typeof routes]);
+    setIsLoading(false);
   };
 
   const UserRegistration = () => {
@@ -110,7 +195,9 @@ const Register = () => {
               required 
             />
           </div>
-          <Button type="submit" className="w-full">Register as User</Button>
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Creating Account...' : 'Register as User'}
+          </Button>
         </div>
       </form>
     );
@@ -257,7 +344,9 @@ const Register = () => {
               />
             </div>
           </div>
-          <Button type="submit" className="w-full">Register as Driver</Button>
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Creating Account...' : 'Register as Driver'}
+          </Button>
         </div>
       </form>
     );
@@ -377,7 +466,9 @@ const Register = () => {
               />
             </div>
           </div>
-          <Button type="submit" className="w-full">Register as Fleet Manager</Button>
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Creating Account...' : 'Register as Fleet Manager'}
+          </Button>
         </div>
       </form>
     );
@@ -478,7 +569,9 @@ const Register = () => {
               </SelectContent>
             </Select>
           </div>
-          <Button type="submit" className="w-full">Register as Admin</Button>
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Creating Account...' : 'Register as Admin'}
+          </Button>
         </div>
       </form>
     );
@@ -491,6 +584,13 @@ const Register = () => {
           <h1 className="text-4xl font-bold text-foreground mb-2">Join TowVerse</h1>
           <p className="text-muted-foreground">Register for your role in the emergency towing network</p>
         </div>
+
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
         <Card className="w-full">
           <CardHeader>
@@ -557,7 +657,7 @@ const Register = () => {
           <p className="text-sm text-muted-foreground">
             Already have an account?{' '}
             <button 
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/login')}
               className="text-primary hover:underline"
             >
               Sign in here
