@@ -9,6 +9,7 @@ import Register from "./pages/Register";
 import UserDashboard from "./pages/UserDashboard";
 import DriverDashboard from "./pages/DriverDashboard";
 import OperatorDashboard from "./pages/OperatorDashboard";
+import DispatcherDashboard from "./pages/DispatcherDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/user" element={<UserDashboard />} />
           <Route path="/driver" element={<DriverDashboard />} />
           <Route path="/operator" element={<OperatorDashboard />} />
+          <Route path="/dispatcher" element={<DispatcherDashboard />} />
           <Route path="/admin" element={<AdminDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

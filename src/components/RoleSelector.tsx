@@ -24,13 +24,13 @@ const roles = [
     route: '/driver'
   },
   {
-    id: 'operator',
+    id: 'dispatcher',
     title: 'I Manage a Fleet',
-    subtitle: 'Fleet operations',
+    subtitle: 'Dispatch & Fleet operations',
     icon: Users,
     description: 'Manage drivers and dispatch jobs',
     color: 'warning',
-    route: '/operator'
+    route: '/dispatcher'
   },
   {
     id: 'admin',
